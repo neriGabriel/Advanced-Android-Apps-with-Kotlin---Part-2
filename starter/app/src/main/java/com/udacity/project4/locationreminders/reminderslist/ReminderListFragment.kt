@@ -1,9 +1,14 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import com.firebase.ui.auth.AuthUI
 import com.udacity.project4.R
+import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
@@ -17,7 +22,8 @@ class ReminderListFragment : BaseFragment() {
     override val _viewModel: RemindersListViewModel by viewModel()
     private lateinit var binding: FragmentRemindersBinding
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding =
@@ -43,6 +49,23 @@ class ReminderListFragment : BaseFragment() {
         binding.addReminderFAB.setOnClickListener {
             navigateToAddReminder()
         }
+
+        binding.viewModel?.authenticationState?.observe(viewLifecycleOwner, Observer {
+                authenticationState ->
+            when(authenticationState) {
+                RemindersListViewModel.AuthenticationState.AUTHENTICATED -> Log.i(TAG, "Authenticated")
+                // If the user is not logged in, they should not be able to set any preferences,
+                // so navigate them to the login fragment
+                RemindersListViewModel.AuthenticationState.UNAUTHENTICATED -> {
+                    val intent = Intent(context, AuthenticationActivity::class.java)
+                    startActivity(intent)
+                }
+
+                else -> Log.e(
+                    TAG, "State: $authenticationState does not require any special UI change"
+                )
+            }
+        })
     }
 
     override fun onResume() {
@@ -71,7 +94,7 @@ class ReminderListFragment : BaseFragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.logout -> {
-//                TODO: add the logout implementation
+                AuthUI.getInstance().signOut(requireContext())
             }
         }
         return super.onOptionsItemSelected(item)
@@ -80,8 +103,12 @@ class ReminderListFragment : BaseFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-//        display logout as menu item
+        //display logout as menu item
         inflater.inflate(R.menu.main_menu, menu)
+    }
+
+    companion object {
+        private const val TAG = "ReminderListFragment"
     }
 
 }
