@@ -172,20 +172,20 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback  {
                 locationResult.addOnCompleteListener {
                     if(it.isSuccessful && it.result != null) {
                         lastLocation = it.result!!
-                        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            LatLng(
-                                lastLocation!!.latitude,
-                                lastLocation!!.longitude
-                            ),
-                            INITIAL_ZOOM
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                LatLng(
+                                        lastLocation.latitude,
+                                        lastLocation.longitude
+                                ),
+                                INITIAL_ZOOM
                         ))
                     } else {
-                        Log.e(TAG, "Current location is using, using default one. " +
+                        Log.e(TAG, "Current location not found, using default one. " +
                                 "Exception: ${it.exception}")
                         map.moveCamera(
                             CameraUpdateFactory.newLatLngZoom(defaultLocation, INITIAL_ZOOM)
                         )
-                        map.uiSettings.isMyLocationButtonEnabled = false
+                        map.uiSettings.isMyLocationButtonEnabled = true
                     }
                 }
             } else {
